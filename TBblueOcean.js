@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         生意参谋蓝海筛选粉红条2.0
+// @name         生意参谋蓝海筛选粉红条2.1
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      2.1
 // @description  try to take over the world!
 // @author       You
 // @match        *://sycm.taobao.com/*
@@ -140,6 +140,19 @@
           tianMaoRate < 65
         ) {
           single.style.backgroundColor = "pink";
+          //   7通过以上这些我们可以得出一个蓝海指数公式:搜索人气*点击率*支付转化率*(1-天猫占比)/在线商品数/统计天数 (1或者7) *1000
+          //   =L2*M2*N2*(1-P2)/O2/7*1000
+          let _searchNum = +searchNum;
+          let _clickRateTextNum = +clickRateTextNum / 100;
+          let _payRate = +payRate / 100;
+          let _onlineProductNum = +onlineProductNum;
+          let _tianMaoRate = +tianMaoRate / 100;
+          single.tbBlueOceanScore =
+            ((_searchNum * _clickRateTextNum * _payRate * (1 - _tianMaoRate)) /
+              _onlineProductNum /
+              7) *
+            1000;
+          console.log("single.tbBlueOceanScore:", single.tbBlueOceanScore);
           selectNodes.push(single);
         }
       });
@@ -159,6 +172,8 @@
         cell.innerText =
           cells[j].innerText && cells[j].innerText.replace(/\n/g, " ");
       }
+      const score_cell = row.insertCell();
+      score_cell.innerText = rows[i].tbBlueOceanScore || 0;
     }
     // for (let i = 0; i < rows.length; i++) {
     //   const row = rows[i];
